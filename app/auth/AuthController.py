@@ -8,6 +8,12 @@ class AuthController:
         self.table = self.db.connect().Table("practice")
         
     def register_user(self, data):
+        
+        # Check the user already exists
+        user = self.get_user(data["email"])
+        if user:
+            return {"message": "User already exists."}
+        
         user = User(
             pk=f"USER#{data['email']}",
             sk="PROFILE",
@@ -20,6 +26,13 @@ class AuthController:
         return user.to_dict()
     
     def login_user(self, data):
+        
+        required_fields = ["email", "password"]
+        missing_fields = [field for field in required_fields if field not in data]
+        
+        if missing_fields:
+            raise ValueError(f"Missing fields: {', '.join(missing_fields)}")
+        
         user_data = self.get_user(data["email"])
 
         if not user_data:
@@ -37,4 +50,8 @@ class AuthController:
 
     def get_user(self, user_email):
         response = self.table.get_item(Key={"pk": f"USER#{user_email}", "sk": "PROFILE"})
+        
+        if "Item" not in response: 
+            return None
+        
         return response["Item"] if "Item" in response else None
