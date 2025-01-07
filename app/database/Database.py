@@ -6,6 +6,7 @@ class Database:
         self.dynamodb = None
 
     def connect(self):
+        # Change the Database connection details as per your local or Production setup
         try:
             self.dynamodb = boto3.resource(
                 'dynamodb',
